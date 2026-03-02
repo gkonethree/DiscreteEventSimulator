@@ -20,7 +20,7 @@ void Simulator::run(){
 
 Simulator::Simulator(Time maxTime): maxTime(maxTime){
     users.push_back(std::make_unique<User>(1000));
-    servers.push_back(std::make_unique<Server>());
+    servers.push_back(std::make_unique<Server>(1));
     links.push_back(std::make_unique<Link>(*users[0], *servers[0]));
     links.push_back(std::make_unique<Link>(*servers[0], *users[0]));
     servers[0]->addIncomingLink(links[0].get());

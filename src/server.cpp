@@ -1,33 +1,43 @@
+#include <stdexcept>
 #include "server.h"
 #include "request.h"
+#include "core.h"
+
+
+Server::Server(int numCores): 
+    cores(std::vector<std::unique_ptr<Core>>(numCores)),
+    coreScheduler(std::make_unique<CoreComparator>(cores)),
+    coreQueue(std::priority_queue<int, std::vector<int>, CoreComparator>(*coreScheduler))
+    {
+    if (numCores <= 0)
+        throw std::runtime_error("Number of cores should be > 0 for a server");
+    for (int i = 0; i < numCores; i++){
+        cores[i] = std::make_unique<Core>(*this);
+    }
+    for(int i = 0; i < numCores; i++){
+        coreQueue.push(i);
+    }
+}
 
 
 ListOfEvents Server::receive(std::shared_ptr<RequestUnloadEvent> event) {
     ListOfEvents consequences;
-    if (requestQueue.empty()){
+    const std::unique_ptr<Core>& core = cores[coreQueue.top()];
+    coreQueue.pop();
+    if (core->queueLength() == 0){
         std::shared_ptr<Event> new_event = std::make_shared<RequestCompletionEvent>(
-            event->time + event->request->processingTime, *this, event->request
+            event->time + event->request->processingTime, *core, event->request
         );
         consequences.push_back(new_event);
     }
-    requestQueue.push(event->request);
+    core->addRequest(event->request);
     return consequences;
 }
 
-ListOfEvents Server::receive(std::shared_ptr<RequestCompletionEvent> event) {
+ListOfEvents Server::loadRequest(Time time, std::shared_ptr<Request> request) const {
     ListOfEvents consequences;
-    requestQueue.pop();
-    std::shared_ptr<Event> load_event = std::make_shared<RequestLoadEvent>(
-        event->time, *(this->outgoingLinks[0]), event->request
-    );
-    consequences.push_back(load_event);
-    if (requestQueue.empty()){
-        return consequences;
-    }
-    std::shared_ptr<Request> request = requestQueue.front();
-    std::shared_ptr<Event> new_event = std::make_shared<RequestCompletionEvent>(
-        event->time + request->processingTime, *this, event->request
-    );
-    consequences.push_back(new_event);
+    consequences.push_back(std::make_shared<RequestLoadEvent>(
+        time, *(this->outgoingLinks[0]), request
+    ));   
     return consequences;
 }

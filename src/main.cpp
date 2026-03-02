@@ -2,6 +2,7 @@
 #include "server.h"
 #include "user.h"
 #include "link.h"
+#include "core.h"
 #include "request.h"
 
 int main(){

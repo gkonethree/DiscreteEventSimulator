@@ -5,14 +5,18 @@
 #include <memory>
 #include "event.h"
 #include "link.h"
+#include "core.h"
 
-class Request;
+class Core;
+class CoreComparator;
 
 class Server : public Linkable{
     private:
-        std::queue<std::shared_ptr<Request>> requestQueue;
+        std::vector<std::unique_ptr<Core>> cores;
+        std::unique_ptr<CoreComparator> coreScheduler;
+        std::priority_queue<int, std::vector<int>, CoreComparator> coreQueue;
     public:
-        Server() {}
+        Server(int numCores);
         ListOfEvents receive(std::shared_ptr<RequestUnloadEvent>);
-        ListOfEvents receive(std::shared_ptr<RequestCompletionEvent>);
+        ListOfEvents loadRequest(Time, std::shared_ptr<Request>) const;
 };

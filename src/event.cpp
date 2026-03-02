@@ -1,5 +1,6 @@
 #include "event.h"
 #include "server.h"
+#include "core.h"
 
 ListOfEvents RequestCompletionEvent::execute(){
     return this->completeAt.receive(std::shared_ptr<RequestCompletionEvent>(shared_from_this()));

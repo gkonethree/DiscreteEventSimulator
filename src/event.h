@@ -10,6 +10,7 @@ class Server;
 class Request;
 class Event;
 class EventComparator;
+class Core;
 
 typedef unsigned long long Time;
 typedef std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator> EventQueue;
@@ -46,10 +47,10 @@ class RequestUnloadEvent: public Event, public std::enable_shared_from_this<Requ
 
 
 class RequestCompletionEvent: public Event, public std::enable_shared_from_this<RequestCompletionEvent>{
-        Server& completeAt;
+        Core& completeAt;
     public:
         const std::shared_ptr<Request> request;
-        RequestCompletionEvent(Time time, Server& completeAt, std::shared_ptr<Request> request) :
+        RequestCompletionEvent(Time time, Core& completeAt, std::shared_ptr<Request> request) :
                             Event (time), completeAt(completeAt), request(request){}
         
         ListOfEvents execute() override;
