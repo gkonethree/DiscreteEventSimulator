@@ -2,6 +2,7 @@
 #include "server.h"
 #include "request.h"
 #include "core.h"
+#include "thread.h"
 
 
 Server::Server(int numCores): 
@@ -10,14 +11,14 @@ Server::Server(int numCores):
     if (numCores <= 0)
         throw std::runtime_error("Number of cores should be > 0 for a server");
     for (int i = 0; i < numCores; i++){
-        cores[i] = std::make_unique<Core>(*this);
+        cores[i] = std::make_unique<Core>(*this, 2);
     }
 }
 
 ListOfEvents Server::receive(std::shared_ptr<RequestCompletionEvent> event){
     ListOfEvents consequences;
-    Core* core = event->request->beingProcessedAt;
-    core->stopProcessing();
+    Thread* thread = event->request->beingProcessedAt;
+    thread->stopProcessing();
 
     ListOfEvents scheduleEvents = scheduleRequestOnCore(event->time);
     ListOfEvents loadEvents = loadRequest(event->time, event->request);
@@ -36,7 +37,7 @@ ListOfEvents Server::scheduleRequestOnCore(Time time){
     std::shared_ptr<Request> request = requestQueue.front();
 
     if (core){
-        ListOfEvents scheduledEvents = core->processRequest(time, request);
+        ListOfEvents scheduledEvents = core->scheduleRequestOnThread(time, request);
         requestQueue.pop();
         consequences.insert(consequences.end(), scheduledEvents.begin(), scheduledEvents.end());
     }   
@@ -58,9 +59,10 @@ ListOfEvents Server::loadRequest(Time time, std::shared_ptr<Request> request){
 }
 
 Core* Server::scheduleCore(){
-    for(auto& core: cores){
-        if (!core->isBusy())
-            return core.get();
-    }
-    return nullptr;
+    Core* core = std::min_element(cores.begin(), cores.end(), 
+        [](const std::unique_ptr<Core>& a, const std::unique_ptr<Core>& b){
+            return a->numThreadsFree() > b->numThreadsFree();
+        }
+    )->get();
+    return core->numThreadsFree() ? core : nullptr;
 }

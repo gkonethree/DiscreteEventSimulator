@@ -5,7 +5,6 @@
 #include <memory>
 #include "event.h"
 #include "link.h"
-#include "core.h"
 
 class Core;
 class CoreComparator;

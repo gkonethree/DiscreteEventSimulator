@@ -3,26 +3,17 @@
 #include <queue>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include "event.h"
 
 class Request;
+class Thread;
 
 class Core{
-    bool busy;
-    std::shared_ptr<Request> requestInService;
+    std::vector<std::unique_ptr<Thread>> threads;
     Server& server;
     public:
-        Core(Server& server): server(server), busy(false) {}
-        inline bool isBusy(){
-            return busy;
-        }
-        ListOfEvents processRequest(Time, std::shared_ptr<Request>);
-        void stopProcessing();
-};
-
-class CoreComparator{
-    public:
-        inline bool operator()(Core* a, Core* b) const{
-            return a->isBusy();
-        }
+        Core(Server& server, int numThreads);
+        ListOfEvents scheduleRequestOnThread(Time, std::shared_ptr<Request>);
+        int numThreadsFree();
 };

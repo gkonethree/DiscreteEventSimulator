@@ -3,11 +3,13 @@
 #include <memory>
 #include "user.h"
 
+class Thread;
+
 class Request{
     public:
         const Time processingTime;
         const User& user;
-        Core* beingProcessedAt;
+        Thread* beingProcessedAt;
         Request(Time processingTime, const User& user) : processingTime(processingTime), user(user), beingProcessedAt(nullptr) {}
         
         Request(const Request&) = delete;
