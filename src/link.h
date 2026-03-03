@@ -1,32 +1,35 @@
 #pragma once
 
-#include <vector>
+#include <unordered_map>
 #include <memory>
+#include <iostream>
 #include "event.h"
 
 class Link;
 
 class Linkable{
     protected:
-        std::vector<Link*> incomingLinks;
-        std::vector<Link*> outgoingLinks;
+        std::unordered_map<const Linkable*, Link*> incomingLinks;
+        std::unordered_map<const Linkable*, Link*> outgoingLinks;
     public:
         Linkable(){}
-        inline void addOutgoingLink(Link* link){
-            outgoingLinks.push_back(link);
+        inline void addOutgoingLink(Linkable* linkable, Link* link){
+            outgoingLinks[linkable] = link;
         }
-        inline void addIncomingLink(Link* link){
-            incomingLinks.push_back(link);
+        inline void addIncomingLink(Linkable* linkable, Link* link){
+            incomingLinks[linkable] = link;
         }
         virtual ListOfEvents receive(std::shared_ptr<RequestUnloadEvent> event) = 0;
 };
 
 
 class Link{
-    const Linkable& from;
-    Linkable& to;
-
+        Linkable& from;
+        Linkable& to;
     public:
-        Link(const Linkable& src, Linkable& dst): from(src), to(dst){}
+        Link(Linkable& src, Linkable& dst): from(src), to(dst){
+            from.addOutgoingLink(&to, this);
+            to.addIncomingLink(&from, this);
+        }
         ListOfEvents receive(std::shared_ptr<RequestLoadEvent> event) const;
 };

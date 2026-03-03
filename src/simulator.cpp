@@ -19,16 +19,22 @@ void Simulator::run(){
 }
 
 Simulator::Simulator(Time maxTime): maxTime(maxTime){
-    users.push_back(std::make_unique<User>(1000));
-    servers.push_back(std::make_unique<Server>(2));
-    links.push_back(std::make_unique<Link>(*users[0], *servers[0]));
-    links.push_back(std::make_unique<Link>(*servers[0], *users[0]));
-    servers[0]->addIncomingLink(links[0].get());
-    users[0]->addOutgoingLink(links[0].get());
-    servers[0]->addOutgoingLink(links[1].get());
-    users[0]->addIncomingLink(links[1].get());
-    std::shared_ptr<Event> initial_event = std::make_shared<RequestLoadEvent>(
-        0, *links[0], std::make_shared<Request>(50, *users[0])
-    );
-    events.push(initial_event);
+    for (int i = 0; i < 5; i++){
+        users.push_back(std::make_unique<User>(1000));
+    }
+    for(int i = 0; i < 1; i++){
+        servers.push_back(std::make_unique<Server>(5));
+    }
+
+    for(int i = 0; i < 5; i++){
+        links.push_back(std::make_unique<Link>(*users[i], *servers[0]));
+        links.push_back(std::make_unique<Link>(*servers[0], *users[i]));        
+    }
+
+    for(int i = 0; i < 5; i++){
+        std::shared_ptr<Event> initial_event = std::make_shared<RequestLoadEvent>(
+            0, *links[i*2], std::make_shared<Request>(50, *users[i])
+        );
+        events.push(initial_event);
+    }
 }

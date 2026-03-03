@@ -52,7 +52,7 @@ ListOfEvents Server::receive(std::shared_ptr<RequestUnloadEvent> event) {
 ListOfEvents Server::loadRequest(Time time, std::shared_ptr<Request> request){
     ListOfEvents consequences;
     consequences.push_back(std::make_shared<RequestLoadEvent>(
-        time, *(this->outgoingLinks[0]), request
+        time, *(this->outgoingLinks[&(request->user)]), request
     ));   
     return std::move(consequences);
 }
