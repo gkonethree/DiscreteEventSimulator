@@ -3,6 +3,7 @@
 #include <queue>
 #include <vector>
 #include <memory>
+#include <iostream>
 
 class Link;
 class Linkable;
@@ -22,6 +23,10 @@ class Event{
         const Time time;
         Event(Time time) : time(time){}
         virtual ListOfEvents execute() = 0;
+        Event(const Event&) = delete;
+        Event(Event &&) = delete;
+        Event operator=(const Event&) = delete;
+        Event operator=(Event&&) = delete;
 };
 
 
@@ -47,10 +52,10 @@ class RequestUnloadEvent: public Event, public std::enable_shared_from_this<Requ
 
 
 class RequestCompletionEvent: public Event, public std::enable_shared_from_this<RequestCompletionEvent>{
-        Core& completeAt;
+        Server& completeAt;
     public:
         const std::shared_ptr<Request> request;
-        RequestCompletionEvent(Time time, Core& completeAt, std::shared_ptr<Request> request) :
+        RequestCompletionEvent(Time time, Server& completeAt, std::shared_ptr<Request> request) :
                             Event (time), completeAt(completeAt), request(request){}
         
         ListOfEvents execute() override;

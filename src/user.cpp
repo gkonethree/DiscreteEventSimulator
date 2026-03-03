@@ -11,5 +11,5 @@ ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event){
         event->time + thinkTime, *(this->outgoingLinks[0]), request
     );
     consequences.push_back(new_event);
-    return consequences;
+    return std::move(consequences);
 }

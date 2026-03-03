@@ -4,21 +4,21 @@
 #include "request.h"
 #include "event.h"
 
-ListOfEvents Core::receive(std::shared_ptr<RequestCompletionEvent> event){
+void Core::stopProcessing(){
+    busy = false;
+    requestInService->beingProcessedAt = nullptr;
+    requestInService.reset();
+}
+
+ListOfEvents Core::processRequest(Time time, std::shared_ptr<Request> request){
     ListOfEvents consequences;
-    std::shared_ptr<Request> request = requestQueue.front();
-    requestQueue.pop();
-    ListOfEvents loadEvents = server.loadRequest(event->time, request);
-    consequences.insert(consequences.end(), loadEvents.begin(), loadEvents.end());
+    busy = true;
+    requestInService = request;
+    requestInService->beingProcessedAt = this;
 
-    if (requestQueue.empty()){
-        return consequences;
-    }
-
-    std::shared_ptr<Request> next_request = requestQueue.front();
-    std::shared_ptr<Event> next_event = std::make_shared<RequestCompletionEvent>(
-        event->time + next_request->processingTime, *this, next_request
+    std::shared_ptr<Event> new_event = std::make_shared<RequestCompletionEvent>(
+        time + request->processingTime, this->server, request
     );
-    consequences.push_back(next_event);
-    return consequences;   
+    consequences.push_back(new_event);
+    return std::move(consequences);   
 }

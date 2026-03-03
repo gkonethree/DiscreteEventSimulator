@@ -6,5 +6,5 @@ ListOfEvents Link::receive(std::shared_ptr<RequestLoadEvent> event) const {
         event->time + 1, to, event->request
     );
     consequences.push_back(new_event);
-    return consequences;
+    return std::move(consequences);
 }

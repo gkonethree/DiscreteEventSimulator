@@ -8,24 +8,21 @@
 class Request;
 
 class Core{
-    std::queue<std::shared_ptr<Request>> requestQueue;
-    const Server& server;
+    bool busy;
+    std::shared_ptr<Request> requestInService;
+    Server& server;
     public:
-        Core(const Server& server): server(server) {}
-        inline void addRequest(std::shared_ptr<Request> request){
-            requestQueue.push(request);
+        Core(Server& server): server(server), busy(false) {}
+        inline bool isBusy(){
+            return busy;
         }
-        inline int queueLength(){
-            return requestQueue.size();
-        }
-        ListOfEvents receive(std::shared_ptr<RequestCompletionEvent>);
+        ListOfEvents processRequest(Time, std::shared_ptr<Request>);
+        void stopProcessing();
 };
 
 class CoreComparator{
-    const std::vector<std::unique_ptr<Core>>& cores;
     public:
-        CoreComparator(std::vector<std::unique_ptr<Core>> & cores): cores(cores){}
-        inline bool operator()(int a, int b) const{
-            return cores[a]->queueLength() < cores[b]->queueLength();
+        inline bool operator()(Core* a, Core* b) const{
+            return a->isBusy();
         }
 };
