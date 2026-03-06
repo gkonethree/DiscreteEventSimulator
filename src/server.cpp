@@ -1,13 +1,17 @@
 #include <stdexcept>
+#include <random>
 #include "server.h"
 #include "request.h"
 #include "core.h"
 #include "thread.h"
 
+extern 
+std::mt19937 gen;
+
 
 Server::Server(int numCores): 
-    cores(std::vector<std::unique_ptr<Core>>(numCores))
-    {
+            cores(std::vector<std::unique_ptr<Core>>(numCores))
+{
     if (numCores <= 0)
         throw std::runtime_error("Number of cores should be > 0 for a server");
     for (int i = 0; i < numCores; i++){
@@ -21,7 +25,7 @@ ListOfEvents Server::receive(std::shared_ptr<RequestCompletionEvent> event){
     thread->stopProcessing();
 
     ListOfEvents scheduleEvents = scheduleRequestOnCore(event->time);
-    ListOfEvents loadEvents = loadRequest(event->time, event->request);
+    ListOfEvents loadEvents = loadRequestOnLink(event->time, event->request);
 
     consequences.insert(consequences.begin(), scheduleEvents.begin(), scheduleEvents.end());
     consequences.insert(consequences.begin(), loadEvents.begin(), loadEvents.end());
@@ -50,11 +54,21 @@ ListOfEvents Server::receive(std::shared_ptr<RequestUnloadEvent> event) {
     return std::move(scheduleRequestOnCore(event->time));
 }
 
-ListOfEvents Server::loadRequest(Time time, std::shared_ptr<Request> request){
+ListOfEvents Server::loadRequestOnLink(Time time, std::shared_ptr<Request> request){
     ListOfEvents consequences;
-    consequences.push_back(std::make_shared<RequestLoadEvent>(
-        time, *(this->outgoingLinks[&(request->user)]), request
-    ));   
+
+    int chosen = dist(gen);
+    if (chosen == serverLinks.size()){
+        consequences.push_back(std::make_shared<RequestLoadEvent>(
+            time, *(this->userLinks[&request->user]), request
+        ));
+    }
+    else{
+        consequences.push_back(std::make_shared<RequestLoadEvent>(
+            time, *(this->serverLinks[chosen].second), request
+        ));  
+    }
+     
     return std::move(consequences);
 }
 
@@ -65,4 +79,28 @@ Core* Server::scheduleCore(){
         }
     )->get();
     return core->numThreadsFree() ? core : nullptr;
+}
+
+
+void Server::addServerLink(Server* server, ServerServerLink* link, double weight){
+    weights.push_back(weight);
+    serverLinks.emplace_back(server, link);
+    updateDist();
+}
+
+void Server::addUserLink(User* user, ServerUserLink* link){
+    userLinks[user] = link;
+}
+
+// Throws exception
+void Server::updateDist(){
+    double sum = std::accumulate(weights.begin(), weights.end(), 0.0);
+    if (sum > 1.0){
+        throw std::invalid_argument("Sum of weights is greater than 1...aborting");
+    }
+    std::vector<double> newWeights(weights.begin(), weights.end());
+    if (userLinks.size())
+        newWeights.push_back(1 - sum);
+    std::discrete_distribution<int>::param_type params(newWeights.begin(), newWeights.end());
+    dist.param(params);
 }

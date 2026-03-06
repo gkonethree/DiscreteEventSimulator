@@ -13,7 +13,7 @@ class Event;
 class EventComparator;
 class Core;
 
-typedef unsigned long long Time;
+typedef double Time;
 typedef std::priority_queue<std::shared_ptr<Event>, std::vector<std::shared_ptr<Event>>, EventComparator> EventQueue;
 typedef std::vector<std::shared_ptr<Event>> ListOfEvents;
 
@@ -43,7 +43,7 @@ class RequestLoadEvent: public Event, public std::enable_shared_from_this<Reques
 class RequestUnloadEvent: public Event, public std::enable_shared_from_this<RequestUnloadEvent>{
         Linkable& unloadTo;
     public:
-            const std::shared_ptr<Request> request;
+        const std::shared_ptr<Request> request;
         RequestUnloadEvent(Time time, Linkable& unloadTo, std::shared_ptr<Request> request) :
                             Event (time), unloadTo(unloadTo), request(request){}
         

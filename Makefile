@@ -1,9 +1,14 @@
 TARGET = simulate
-OBJS = main.o simulator.o event.o link.o server.o user.o core.o thread.o
-HEADERS = simulator.h event.h link.h request.h server.h user.h core.h thread.h
+DIR = src
+SRC= $(wildcard $(DIR)/*.cpp)
+HEADERS = $(wildcard $(DIR)/*.h)
+OBJS = $(patsubst %.cpp, %.o, $(SRC)) 
 FLAGS = -O0 -fno-elide-constructors -g
 
+
+
 all: $(TARGET)
+	
 
 $(TARGET): $(OBJS)
 	g++ $(FLAGS) -o $@ $^
@@ -12,4 +17,4 @@ $(TARGET): $(OBJS)
 	g++ $(FLAGS) -o $@ -c $<
 
 clean:
-	rm -f *.o $(TARGET)
+	rm -f -v $(DIR)/*.o $(TARGET)

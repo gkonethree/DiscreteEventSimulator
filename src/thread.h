@@ -15,7 +15,7 @@ class Thread{
         Thread(Server& server): server(server){}
         void stopProcessing();
         ListOfEvents processRequest(Time, std::shared_ptr<Request>);
-        inline bool isBusy(){
+        inline bool isBusy() const{
             return busy;
         }
 };

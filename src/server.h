@@ -3,25 +3,36 @@
 #include <vector>
 #include <set>
 #include <memory>
+#include <unordered_map>
+#include <random>
 #include "event.h"
 #include "link.h"
 
 class Core;
 class CoreComparator;
 class Request;
+class User;
+class ServerServerLink;
+class ServerUserLink;
+
 
 class Server : public Linkable{
     private:
-        // Dont dereference vector elements by pointers, the elements may get reallocated
-        std::vector<std::unique_ptr<Core>> cores;
-        std::queue<std::shared_ptr<Request>> requestQueue;
+        std::vector<std::pair<const Server*, ServerServerLink*>>  serverLinks;
+        std::unordered_map<const User*, ServerUserLink*>          userLinks;
+        std::vector<double>                                       weights;
+        std::discrete_distribution<int>                           dist;
+        std::vector<std::unique_ptr<Core>>                        cores;
+        std::queue<std::shared_ptr<Request>>                      requestQueue;
     public:
         Server(int numCores);
-        ListOfEvents receive(std::shared_ptr<RequestUnloadEvent>);
+        void  addServerLink(Server*, ServerServerLink*, double weight);
+        void  addUserLink(User*, ServerUserLink*);
+        ListOfEvents receive(std::shared_ptr<RequestUnloadEvent>) override;
         ListOfEvents receive(std::shared_ptr<RequestCompletionEvent>);
     private:
-        ListOfEvents loadRequest(Time, std::shared_ptr<Request>);
+        ListOfEvents loadRequestOnLink(Time, std::shared_ptr<Request>);
         ListOfEvents scheduleRequestOnCore(Time);
-        void changePriority(Core*);
-        Core* scheduleCore();
+        Core*        scheduleCore();
+        void         updateDist();
 };
