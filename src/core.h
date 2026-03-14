@@ -11,9 +11,17 @@ class Thread;
 
 class Core{
     std::vector<std::unique_ptr<Thread>> threads;
+    Thread* runningThread;
     Server& server;
+    const Time timeSlice;
+    
+    ListOfEvents scheduleThreadOnCore(Time);
+    
     public:
-        Core(Server& server, int numThreads);
-        ListOfEvents scheduleRequestOnThread(Time, std::shared_ptr<Request>);
         int numThreadsFree();
+        Core(Server& server, int numThreads, Time timeSlice);
+        ListOfEvents init(Time time);
+        ListOfEvents giveRequestAThread(Time, std::shared_ptr<Request>);
+        ListOfEvents completeThread(Time);
+        ListOfEvents receive(std::shared_ptr<TimerInterruptEvent>);
 };

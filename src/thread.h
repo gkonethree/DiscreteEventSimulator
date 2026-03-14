@@ -8,14 +8,21 @@ class Request;
 
 class Thread{
     std::shared_ptr<Request> requestInService;
+    std::shared_ptr<RequestCompletionEvent> completionEvent;
+    Time remainingTime;
+    Time lastScheduled;
     bool busy;
-    Server& server;
-
+    
     public:
-        Thread(Server& server): server(server){}
-        void stopProcessing();
-        ListOfEvents processRequest(Time, std::shared_ptr<Request>);
-        inline bool isBusy() const{
-            return busy;
-        }
+        Server& server;
+        Core& core;
+        
+        Thread(Server& server, Core& core): server(server), core(core) {}
+        inline bool isBusy() const {return busy;}
+        
+        void completeProcessing(Time);
+        void yield(Time);
+        void assignRequest(std::shared_ptr<Request>);
+        ListOfEvents resumeProcessing(Time);
+
 };

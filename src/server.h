@@ -25,14 +25,15 @@ class Server : public Linkable{
         std::vector<std::unique_ptr<Core>>                        cores;
         std::queue<std::shared_ptr<Request>>                      requestQueue;
     public:
-        Server(int numCores);
+        Server(int numCores, int numThreadsPerCore, Time timeSlice);
         void  addServerLink(Server*, ServerServerLink*, double weight);
         void  addUserLink(User*, ServerUserLink*);
+        ListOfEvents init(Time time);
         ListOfEvents receive(std::shared_ptr<RequestUnloadEvent>) override;
         ListOfEvents receive(std::shared_ptr<RequestCompletionEvent>);
     private:
         ListOfEvents loadRequestOnLink(Time, std::shared_ptr<Request>);
-        ListOfEvents scheduleRequestOnCore(Time);
+        ListOfEvents assignRequestToCore(Time);
         Core*        scheduleCore();
         void         updateDist();
 };

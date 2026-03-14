@@ -9,49 +9,50 @@ extern
 std::mt19937 gen;
 
 
-Server::Server(int numCores): 
+Server::Server(int numCores, int numThreadsPerCore, Time timeSlice): 
             cores(std::vector<std::unique_ptr<Core>>(numCores))
 {
     if (numCores <= 0)
         throw std::runtime_error("Number of cores should be > 0 for a server");
     for (int i = 0; i < numCores; i++){
-        cores[i] = std::make_unique<Core>(*this, 2);
+        cores[i] = std::make_unique<Core>(*this, numThreadsPerCore, timeSlice);
     }
 }
 
 ListOfEvents Server::receive(std::shared_ptr<RequestCompletionEvent> event){
     ListOfEvents consequences;
-    Thread* thread = event->request->beingProcessedAt;
-    thread->stopProcessing();
 
-    ListOfEvents scheduleEvents = scheduleRequestOnCore(event->time);
+    ListOfEvents completionEvents = event->request->beingProcessedAt->core.completeThread(event->time);
+    ListOfEvents scheduleEvents = this->assignRequestToCore(event->time);
     ListOfEvents loadEvents = loadRequestOnLink(event->time, event->request);
 
-    consequences.insert(consequences.begin(), scheduleEvents.begin(), scheduleEvents.end());
-    consequences.insert(consequences.begin(), loadEvents.begin(), loadEvents.end());
-    return std::move(consequences);
+    consequences.insert(consequences.end(), completionEvents.begin(), completionEvents.end());
+    consequences.insert(consequences.end(), scheduleEvents.begin(), scheduleEvents.end());
+    consequences.insert(consequences.end(), loadEvents.begin(), loadEvents.end());
+
+    return consequences;
 }
 
-ListOfEvents Server::scheduleRequestOnCore(Time time){
+ListOfEvents Server::assignRequestToCore(Time time){
     ListOfEvents consequences;
     Core* core = scheduleCore();
     if (requestQueue.empty())
-        return std::move(consequences);
+        return consequences;
 
     std::shared_ptr<Request> request = requestQueue.front();
 
     if (core){
-        ListOfEvents scheduledEvents = core->scheduleRequestOnThread(time, request);
+        ListOfEvents scheduledEvents = core->giveRequestAThread(time, request);
         requestQueue.pop();
         consequences.insert(consequences.end(), scheduledEvents.begin(), scheduledEvents.end());
     }   
-    return std::move(consequences);
+    return consequences;
 
 }
 
 ListOfEvents Server::receive(std::shared_ptr<RequestUnloadEvent> event) {
-    requestQueue.push(event->request);
-    return std::move(scheduleRequestOnCore(event->time));
+    this->requestQueue.push(event->request);
+    return this->assignRequestToCore(event->time);
 }
 
 ListOfEvents Server::loadRequestOnLink(Time time, std::shared_ptr<Request> request){
@@ -69,7 +70,7 @@ ListOfEvents Server::loadRequestOnLink(Time time, std::shared_ptr<Request> reque
         ));  
     }
      
-    return std::move(consequences);
+    return consequences;
 }
 
 Core* Server::scheduleCore(){
@@ -79,6 +80,15 @@ Core* Server::scheduleCore(){
         }
     )->get();
     return core->numThreadsFree() ? core : nullptr;
+}
+
+ListOfEvents Server::init(Time time){
+    ListOfEvents initEvents;
+    for(auto& core: cores){
+        ListOfEvents coreInit = core->init(time);
+        initEvents.insert(initEvents.end(), coreInit.begin(), coreInit.end());
+    }
+    return initEvents;
 }
 
 
