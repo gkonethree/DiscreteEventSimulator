@@ -26,8 +26,9 @@ void Simulator::run(){
 
 Simulator::Simulator(Time maxTime): maxTime(maxTime){
     int numusers = 5, numservers = 1;
+    const int timeout=10000;
     for (int i = 0; i < numusers; i++){
-        users.push_back(std::make_unique<User>(1000, 200, 50));
+        users.push_back(std::make_unique<User>(1000, 200, 50,timeout));
     }
     for(int i = 0; i < numservers; i++){
         servers.push_back(std::make_unique<Server>(1, 3, 10));
@@ -43,9 +44,10 @@ Simulator::Simulator(Time maxTime): maxTime(maxTime){
 
     // links.push_back(std::make_unique<ServerServerLink>(*servers[0], *servers[1], 0.5));
     
+    //assuming init time is zero, ek baar confirm kar lena
     for(int i = 0; i < numusers; i++){
         std::shared_ptr<Event> initial_event = std::make_shared<RequestLoadEvent>(
-            0, *links[i*2], std::make_shared<Request>(50, *users[i])
+            0, *links[i*2], std::make_shared<Request>(50, *users[i], 0)
         );
         events.push(initial_event);
     }

@@ -7,6 +7,7 @@
 void Thread::completeProcessing(Time time){
     this->busy = false;
     this->requestInService->beingProcessedAt = nullptr;
+    this->requestInService->endTime=time;
     this->requestInService.reset();
     this->completionEvent.reset();
     this->remainingTime = 0;

@@ -17,12 +17,14 @@ class User: public Linkable{
     UserServerLink*                  serverLink;
     const Time                       requestProcessingTime;
     std::normal_distribution<Time>   thinkTime;
+    const Time                       timeout;
     
     public:
-        User(const Time thinkMean, const Time thinkVariance, const Time requestProcessingTime) : 
+        User(const Time thinkMean, const Time thinkVariance, const Time requestProcessingTime, const Time timeout) : 
             requestProcessingTime(requestProcessingTime), 
             serverLink(nullptr), 
-            thinkTime(thinkMean, thinkVariance)
+            thinkTime(thinkMean, thinkVariance),
+            timeout(timeout)
         {}
         void addServerLink(UserServerLink*);
         ListOfEvents receive(std::shared_ptr<RequestUnloadEvent> event) override;
