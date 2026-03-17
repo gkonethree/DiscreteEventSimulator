@@ -31,6 +31,8 @@ class Server : public Linkable{
         ListOfEvents init(Time time);
         ListOfEvents receive(std::shared_ptr<RequestUnloadEvent>) override;
         ListOfEvents receive(std::shared_ptr<RequestCompletionEvent>);
+        double getAverageCoreUtilization(Time totalTime) const;
+        std::vector<double> getCoreUtilizations(Time totalTime) const;
     private:
         ListOfEvents loadRequestOnLink(Time, std::shared_ptr<Request>);
         ListOfEvents assignRequestToCore(Time);

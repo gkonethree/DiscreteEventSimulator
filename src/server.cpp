@@ -114,3 +114,20 @@ void Server::updateDist(){
     std::discrete_distribution<int>::param_type params(newWeights.begin(), newWeights.end());
     dist.param(params);
 }
+
+double Server::getAverageCoreUtilization(Time totalTime) const {
+    if (cores.empty()) return 0.0;
+    double sum = 0.0;
+    for (const auto& core : cores) {
+        sum += core->getUtilization(totalTime);
+    }
+    return sum / cores.size();
+}
+
+std::vector<double> Server::getCoreUtilizations(Time totalTime) const {
+    std::vector<double> utilizations;
+    for (const auto& core : cores) {
+        utilizations.push_back(core->getUtilization(totalTime));
+    }
+    return utilizations;
+}

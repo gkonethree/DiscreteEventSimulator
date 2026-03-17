@@ -10,5 +10,5 @@ int main(){
     Time max_time=10000;
     Simulator simulator(max_time);
     simulator.run();
-    simulator.metrics->printSummary(simulator.lastTime);
+    simulator.metrics->printSummary(simulator.lastTime); 
 }
