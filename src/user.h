@@ -5,6 +5,7 @@
 #include <random>
 #include "event.h"
 #include "link.h"
+#include "metrics.h"
 
 class UserServerLink;
 
@@ -18,13 +19,15 @@ class User: public Linkable{
     const Time                       requestProcessingTime;
     std::normal_distribution<Time>   thinkTime;
     const Time                       timeout;
+    Metrics*                         metrics;
     
     public:
-        User(const Time thinkMean, const Time thinkVariance, const Time requestProcessingTime, const Time timeout) : 
+        User(const Time thinkMean, const Time thinkVariance, const Time requestProcessingTime, const Time timeout, Metrics* metrics) : 
             requestProcessingTime(requestProcessingTime), 
             serverLink(nullptr), 
             thinkTime(thinkMean, thinkVariance),
-            timeout(timeout)
+            timeout(timeout),
+            metrics(metrics)
         {}
         void addServerLink(UserServerLink*);
         ListOfEvents receive(std::shared_ptr<RequestUnloadEvent> event) override;

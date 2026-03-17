@@ -7,11 +7,13 @@ std::mt19937 gen;
 
 ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event) {
 
-    //ise acche se likhna hai
-    if(event->request->endTime - event->request->startTime >= timeout){
-        //do timeout
+    Time responseTime=event->request->endTime - event->request->startTime;
+    if( responseTime>= timeout){
+        metrics->insertBadEvent(responseTime);
     }
-    //add other metric capture
+    else{
+        metrics->insertGoodEvent(responseTime);
+    }
 
     ListOfEvents consequences;
     std::shared_ptr<Request> request = std::make_shared<Request>(

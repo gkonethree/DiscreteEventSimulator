@@ -7,6 +7,8 @@
 #include "thread.h"
 
 int main(){
-    Simulator simulator(10000);
+    Time max_time=10000;
+    Simulator simulator(max_time);
     simulator.run();
+    simulator.metrics->printSummary(simulator.lastTime);
 }

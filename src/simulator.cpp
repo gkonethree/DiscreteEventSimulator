@@ -15,11 +15,17 @@ void Simulator::run(){
         if (event->outdated)
             continue;
 
-        std::cout << "Time: " << " " << event->time << std::endl;
+        //std::cout << "Time: " << " " << event->time << std::endl;
         
         std::vector<std::shared_ptr<Event>> new_events = event->execute();
         for(auto new_event : new_events){
             events.push(new_event);
+        }
+        if(events.empty()){
+            lastTime=event->time;
+        }
+        if(events.top()->time >= this->maxTime){
+            lastTime=this->maxTime;
         }
     }
 }
@@ -27,8 +33,9 @@ void Simulator::run(){
 Simulator::Simulator(Time maxTime): maxTime(maxTime){
     int numusers = 5, numservers = 1;
     const int timeout=10000;
+    metrics = new Metrics;
     for (int i = 0; i < numusers; i++){
-        users.push_back(std::make_unique<User>(1000, 200, 50,timeout));
+        users.push_back(std::make_unique<User>(1000, 200, 50,timeout,metrics));
     }
     for(int i = 0; i < numservers; i++){
         servers.push_back(std::make_unique<Server>(1, 3, 10));
