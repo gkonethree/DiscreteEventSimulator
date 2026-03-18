@@ -12,6 +12,7 @@ std::mt19937 gen;
 Server::Server(int numCores, int numThreadsPerCore, Time timeSlice): 
             cores(std::vector<std::unique_ptr<Core>>(numCores))
 {
+    numRequestsDropped = 0;
     if (numCores <= 0)
         throw std::runtime_error("Number of cores should be > 0 for a server");
     for (int i = 0; i < numCores; i++){
@@ -79,6 +80,8 @@ Core* Server::scheduleCore(){
             return a->numThreadsFree() > b->numThreadsFree();
         }
     )->get();
+    if(core->numThreadsFree() == 0)
+        numRequestsDropped++;
     return core->numThreadsFree() ? core : nullptr;
 }
 

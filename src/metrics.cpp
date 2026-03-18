@@ -35,6 +35,7 @@ void Metrics::printSummary(Time t)
     std::cout << "Throughput: " << (successfulReq + unsuccessfulReq) / t << std::endl;
     std::cout << "Goodput: " << (successfulReq) / t << std::endl;
     std::cout << "Badput: " << unsuccessfulReq / t << std::endl;
+    std::cout << "Fraction of Dropped Requests: " << droppedReq / (double)(successfulReq + unsuccessfulReq + droppedReq) << std::endl;
 
     std::cout << "\n===== Core Utilization Metrics =====" << std::endl;
     for (const auto &entry : avgCoreUtilizationByServer)

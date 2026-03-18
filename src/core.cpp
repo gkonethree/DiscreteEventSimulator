@@ -56,6 +56,7 @@ ListOfEvents Core::giveRequestAThread(Time time, std::shared_ptr<Request> reques
             return this->runningThread ? ListOfEvents() : scheduleThreadOnCore(time);
         }
     }
+    
     throw std::runtime_error("Trying to schedule on a core with all busy threads");
 }
 

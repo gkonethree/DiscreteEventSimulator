@@ -25,6 +25,7 @@ class Server : public Linkable{
         std::vector<std::unique_ptr<Core>>                        cores;
         std::queue<std::shared_ptr<Request>>                      requestQueue;
     public:
+        int numRequestsDropped;
         Server(int numCores, int numThreadsPerCore, Time timeSlice);
         void  addServerLink(Server*, ServerServerLink*, double weight);
         void  addUserLink(User*, ServerUserLink*);
