@@ -6,7 +6,6 @@ std::mt19937 gen;
 
 
 ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event) {
-
     Time serviceTime = generateServiceTime();
     Time thinkTime = generateThinkTime();
 
