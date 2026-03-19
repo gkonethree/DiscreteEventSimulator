@@ -35,12 +35,13 @@ void Simulator::run(){
         double avgUtil = servers[i]->getAverageCoreUtilization(lastTime);
         auto coreUtils = servers[i]->getCoreUtilizations(lastTime);
         metrics->insertCoreUtilization(i, avgUtil, coreUtils);
+        metrics->insertNumDroppedReq(servers[i]->numRequestsDropped);
     }
 }
 
 Simulator::Simulator(Time maxTime): maxTime(maxTime){
-    int numusers = 100, numservers = 1;
-    const int timeout=10000;
+    int numusers = 100000, numservers = 1;
+    const int timeout=100;
     metrics = new Metrics;
     for (int i = 0; i < numusers; i++){
         int thinkMean = 1;

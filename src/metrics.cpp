@@ -20,6 +20,11 @@ void Metrics::insertCoreUtilization(int serverId, double avgUtilization, const s
     coreUtilizationByServer[serverId] = coreUtilizations;
 }
 
+void Metrics::insertNumDroppedReq(int numDropped)
+{
+    droppedReq += numDropped;
+}
+
 void Metrics::printSummary(Time t)
 {
     Time avgResTime = 0;
