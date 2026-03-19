@@ -1,4 +1,3 @@
-
 import subprocess
 import matplotlib.pyplot as plt
 
@@ -61,4 +60,3 @@ if __name__ == "__main__":
     plt.title("Server Utilization vs Throughput")
     plt.savefig("utilization_plot.png")
     plt.clf()
-        
