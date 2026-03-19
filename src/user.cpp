@@ -7,7 +7,7 @@ std::mt19937 gen;
 
 ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event) {
 
-    Time responseTime=event->request->endTime - event->request->startTime;
+    Time responseTime=event->time - event->request->startTime;
     if( responseTime>= timeout){
         metrics->insertBadEvent(responseTime);
     }

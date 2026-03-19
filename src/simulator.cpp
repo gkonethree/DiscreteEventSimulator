@@ -6,7 +6,7 @@
 #include "request.h"
 #include "thread.h"
 #include "core.h"
-
+#include "params.h"
 
 void Simulator::run(){
     while(!events.empty() && events.top()->time < this->maxTime){
@@ -39,27 +39,19 @@ void Simulator::run(){
     }
 }
 
-Simulator::Simulator(Time maxTime): maxTime(maxTime){
-    int numusers = 100000, numservers = 1;
-    const int timeout=100;
+Simulator::Simulator(Time maxTime, int numusers): maxTime(maxTime){
     metrics = new Metrics;
     for (int i = 0; i < numusers; i++){
-        int thinkMean = 1;
-        int thinkVariance = 0.5;
-        int requestProcessingTime =1;
         users.push_back(std::make_unique<User>(thinkMean, thinkVariance, requestProcessingTime, timeout, metrics));
     }
     for(int i = 0; i < numservers; i++){
-        int numCores = 50;
-        int numThreadsPerCore = 3;
-        int timeSlice = 10;
-        servers.push_back(std::make_unique<Server>(numCores, numThreadsPerCore, timeSlice));
+        servers.push_back(std::make_unique<Server>(numCores, numThreadsPerCore, timeSlice, contextSwitchTime, bufferSize));
     }
 
     
     for(int i = 0; i < numusers; i++){
-        links.push_back(std::make_unique<UserServerLink>(*users[i], *servers[0]));       
-        links.push_back(std::make_unique<ServerUserLink>(*servers[0], *users[i]));        
+        links.push_back(std::make_unique<UserServerLink>(*users[i], *servers[0],propDelay));       
+        links.push_back(std::make_unique<ServerUserLink>(*servers[0], *users[i],propDelay));        
     }
 
 
@@ -68,7 +60,7 @@ Simulator::Simulator(Time maxTime): maxTime(maxTime){
     //assuming init time is zero, ek baar confirm kar lena
     for(int i = 0; i < numusers; i++){
         std::shared_ptr<Event> initial_event = std::make_shared<RequestLoadEvent>(
-            0, *links[i*2], std::make_shared<Request>(50, *users[i], 0)
+            0, *links[i*2], std::make_shared<Request>(requestProcessingTime, *users[i], 0)
         );
         events.push(initial_event);
     }

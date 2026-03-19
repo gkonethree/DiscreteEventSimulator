@@ -19,7 +19,7 @@ ListOfEvents Core::scheduleThreadOnCore(Time time)
                 isIdle = false;
             }
             runningThread = thread.get();
-            return thread->resumeProcessing(time);
+            return thread->resumeProcessing(time+contextSwitchTime);
         }
     }
     if (!isIdle)
@@ -32,7 +32,8 @@ ListOfEvents Core::scheduleThreadOnCore(Time time)
 }
 
 // Public
-Core::Core(Server &server, int numThreads, Time timeSlice) : server(server), timeSlice(timeSlice), runningThread(nullptr), lastIdleStart(0),isIdle(true), timeFree(0)
+Core::Core(Server &server, int numThreads, Time timeSlice, Time contextSwitchTime) : server(server), timeSlice(timeSlice), runningThread(nullptr),
+    lastIdleStart(0),isIdle(true), timeFree(0), contextSwitchTime(contextSwitchTime)
 {
     for (int i = 0; i < numThreads; i++)
         threads.push_back(std::make_unique<Thread>(server, *this));

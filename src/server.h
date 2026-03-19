@@ -24,9 +24,10 @@ class Server : public Linkable{
         std::discrete_distribution<int>                           dist;
         std::vector<std::unique_ptr<Core>>                        cores;
         std::queue<std::shared_ptr<Request>>                      requestQueue;
+        const int bufferSize;
     public:
         int numRequestsDropped;
-        Server(int numCores, int numThreadsPerCore, Time timeSlice);
+        Server(int numCores, int numThreadsPerCore, Time timeSlice, Time contextSwitchTime, int bufferSize);
         void  addServerLink(Server*, ServerServerLink*, double weight);
         void  addUserLink(User*, ServerUserLink*);
         ListOfEvents init(Time time);

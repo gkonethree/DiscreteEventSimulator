@@ -25,24 +25,25 @@ class Link{
     private:
         Linkable& from;
         Linkable& to;
+        const Time propDelay;
     public:
-        Link(Linkable& from, Linkable& to): from(from), to(to){}
+        Link(Linkable& from, Linkable& to, const Time propDelay): from(from), to(to), propDelay(propDelay){}
         ListOfEvents receive(std::shared_ptr<RequestLoadEvent> event) const;
 };
 
 class ServerServerLink: public Link{
     const double weight;
     public:
-        ServerServerLink(Server& from, Server& to, double weight);
+        ServerServerLink(Server& from, Server& to, double weight, const Time propDelay);
 };
 
 class ServerUserLink: public Link{
     public:
-        ServerUserLink(Server& from, User& to);
+        ServerUserLink(Server& from, User& to, const Time propDelay);
 };
 
 
 class UserServerLink: public Link{
     public:
-        UserServerLink(User& from, Server& to);
+        UserServerLink(User& from, Server& to, const Time propDelay);
 };

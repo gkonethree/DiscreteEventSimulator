@@ -6,9 +6,10 @@
 #include "request.h"
 #include "thread.h"
 
-int main(){
-    Time max_time=10000;
-    Simulator simulator(max_time);
+int main(int argc, char* argv[]){
+    Time max_time=100000;
+    int numusers=atoi(argv[1]);
+    Simulator simulator(max_time, numusers);
     simulator.run();
     simulator.metrics->printSummary(simulator.lastTime); 
 }

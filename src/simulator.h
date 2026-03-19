@@ -16,6 +16,6 @@ class Simulator{
     public:
         Metrics* metrics;   
         Time lastTime;
-        Simulator(Time maxTime);
+        Simulator(Time maxTime, int numusers);
         void run();
 };

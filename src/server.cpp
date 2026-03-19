@@ -9,14 +9,14 @@ extern
 std::mt19937 gen;
 
 
-Server::Server(int numCores, int numThreadsPerCore, Time timeSlice): 
-            cores(std::vector<std::unique_ptr<Core>>(numCores))
+Server::Server(int numCores, int numThreadsPerCore, Time timeSlice, Time contextSwitchTime, int bufferSize) : 
+    cores(std::vector<std::unique_ptr<Core>>(numCores)), bufferSize(bufferSize)
 {
     numRequestsDropped = 0;
     if (numCores <= 0)
         throw std::runtime_error("Number of cores should be > 0 for a server");
     for (int i = 0; i < numCores; i++){
-        cores[i] = std::make_unique<Core>(*this, numThreadsPerCore, timeSlice);
+        cores[i] = std::make_unique<Core>(*this, numThreadsPerCore, timeSlice, contextSwitchTime);
     }
 }
 
@@ -52,6 +52,10 @@ ListOfEvents Server::assignRequestToCore(Time time){
 }
 
 ListOfEvents Server::receive(std::shared_ptr<RequestUnloadEvent> event) {
+    if(requestQueue.size() >= bufferSize){
+        numRequestsDropped++;
+        return ListOfEvents();
+    }
     this->requestQueue.push(event->request);
     return this->assignRequestToCore(event->time);
 }
@@ -80,8 +84,6 @@ Core* Server::scheduleCore(){
             return a->numThreadsFree() > b->numThreadsFree();
         }
     )->get();
-    if(core->numThreadsFree() == 0)
-        numRequestsDropped++;
     return core->numThreadsFree() ? core : nullptr;
 }
 
