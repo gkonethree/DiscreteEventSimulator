@@ -74,9 +74,6 @@ Simulator::Simulator(Time maxTime, Distribution serviceTimeDistribution, int num
     //assuming init time is zero, ek baar confirm kar lena
     for(int i = 0; i < numusers; i++){
         ListOfEvents initial_events = users[i]->init(0);
-        std::shared_ptr<Event> initial_event = std::make_shared<RequestLoadEvent>(
-            0, *links[i*2], std::make_shared<Request>(expServiceTimeMean, *users[i], 0)
-        );
         for(auto event: initial_events)
             events.push(initial_event);
     }

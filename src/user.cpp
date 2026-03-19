@@ -6,7 +6,11 @@ std::mt19937 gen;
 
 
 ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event) {
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> 4983c38a29bb1039865379bb72d3519dfbad9cb0
     Time serviceTime = generateServiceTime();
     Time thinkTime = generateThinkTime();
 
@@ -58,7 +62,7 @@ ListOfEvents User::init(Time time) {
     Time thinkTime = generateThinkTime();
 
     std::shared_ptr<Request> request = std::make_shared<Request>(
-        serviceTime, *this, time + thinkTime
+        serviceTime, *this, time
     );
     std::shared_ptr<Event> new_event = std::make_shared<RequestLoadEvent>(
         time +thinkTime, *(this->serverLink), request
