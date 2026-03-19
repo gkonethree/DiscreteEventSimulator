@@ -39,10 +39,24 @@ void Simulator::run(){
     }
 }
 
-Simulator::Simulator(Time maxTime, int numusers): maxTime(maxTime){
+Simulator::Simulator(Time maxTime, Distribution serviceTimeDistribution, int numusers): maxTime(maxTime){
     metrics = new Metrics;
-    for (int i = 0; i < numusers; i++){
-        users.push_back(std::make_unique<User>(thinkMean, thinkVariance, requestProcessingTime, timeout, metrics));
+    if (serviceTimeDistribution == Distribution::Constant){
+        for (int i = 0; i < numusers; i++){
+            users.push_back(std::make_unique<User>(thinkMean, thinkVariance, constantServiceTime, timeout, metrics));
+        }
+    }
+    else if (serviceTimeDistribution == Distribution::Exponential){
+        std::exponential_distribution<Time> exp(expServiceTimeMean);
+        for (int i = 0; i < numusers; i++){
+            users.push_back(std::make_unique<User>(thinkMean, thinkVariance, exp, timeout, metrics));
+        }
+    }
+    else{
+        std::uniform_real_distribution<Time> uniform_dist(uniformLow, uniformHigh);
+        for (int i = 0; i < numusers; i++){
+            users.push_back(std::make_unique<User>(thinkMean, thinkVariance, uniform_dist, timeout, metrics));
+        }
     }
     for(int i = 0; i < numservers; i++){
         servers.push_back(std::make_unique<Server>(numCores, numThreadsPerCore, timeSlice, contextSwitchTime, bufferSize));
@@ -59,10 +73,12 @@ Simulator::Simulator(Time maxTime, int numusers): maxTime(maxTime){
     
     //assuming init time is zero, ek baar confirm kar lena
     for(int i = 0; i < numusers; i++){
+        ListOfEvents initial_events = users[i]->init(0);
         std::shared_ptr<Event> initial_event = std::make_shared<RequestLoadEvent>(
-            0, *links[i*2], std::make_shared<Request>(requestProcessingTime, *users[i], 0)
+            0, *links[i*2], std::make_shared<Request>(expServiceTimeMean, *users[i], 0)
         );
-        events.push(initial_event);
+        for(auto event: initial_events)
+            events.push(initial_event);
     }
     for(int i = 0; i < numservers; i++){
         ListOfEvents initevents = servers[i]->init(0);

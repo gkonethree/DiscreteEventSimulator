@@ -5,6 +5,7 @@
 class User;
 class Server;
 class Link;
+enum class Distribution;
 
 class Simulator{
     private:
@@ -16,6 +17,6 @@ class Simulator{
     public:
         Metrics* metrics;   
         Time lastTime;
-        Simulator(Time maxTime, int numusers);
+        Simulator(Time maxTime, Distribution serviceTimeDistribution, int numusers);
         void run();
 };
