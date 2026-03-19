@@ -75,7 +75,7 @@ Simulator::Simulator(Time maxTime, Distribution serviceTimeDistribution, int num
     for(int i = 0; i < numusers; i++){
         ListOfEvents initial_events = users[i]->init(0);
         for(auto event: initial_events)
-            events.push(initial_event);
+            events.push(event);
     }
     for(int i = 0; i < numservers; i++){
         ListOfEvents initevents = servers[i]->init(0);
