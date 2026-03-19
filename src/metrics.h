@@ -9,7 +9,8 @@ class Metrics
     int successfulReq;
     int unsuccessfulReq;
     int droppedReq;
-    std::vector<Time> responseTimes;
+    std::vector<Time> rCycle;
+    std::vector<Time> rSys;
     std::unordered_map<int, std::vector<double>> coreUtilizationByServer;
     std::unordered_map<int, double> avgCoreUtilizationByServer;
 
@@ -20,4 +21,5 @@ public:
     void insertNumDroppedReq(int numDropped);
     void insertCoreUtilization(int serverId, double avgUtilization, const std::vector<double> &coreUtilizations);
     void printSummary(Time t);
+    void insertRsysEvent(Time t);
 };

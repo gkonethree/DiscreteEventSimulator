@@ -5,13 +5,13 @@
 void Metrics::insertGoodEvent(Time t)
 {
     successfulReq += 1;
-    responseTimes.push_back(t);
+    rCycle.push_back(t);
 }
 
 void Metrics::insertBadEvent(Time t)
 {
     unsuccessfulReq += 1;
-    responseTimes.push_back(t);
+    rCycle.push_back(t);
 }
 
 void Metrics::insertCoreUtilization(int serverId, double avgUtilization, const std::vector<double> &coreUtilizations)
@@ -25,18 +25,32 @@ void Metrics::insertNumDroppedReq(int numDropped)
     droppedReq += numDropped;
 }
 
+void Metrics::insertRsysEvent(Time t)
+{
+    rSys.push_back(t);
+}
+
 void Metrics::printSummary(Time t)
 {
     Time avgResTime = 0;
-    for (Time i : responseTimes)
+    for (Time i : rCycle)
     {
         avgResTime += i;
     }
-    if (responseTimes.size() > 0)
-        avgResTime /= (responseTimes.size());
+    if (rCycle.size() > 0)
+        avgResTime /= (rCycle.size());
+
+    Time avgRsysTime = 0;
+    for (Time i : rSys)
+    {
+        avgRsysTime += i;
+    }
+    if (rSys.size() > 0)
+        avgRsysTime /= (rSys.size());
 
 
-    std::cout << "Average Response Time: " << avgResTime << std::endl;
+    std::cout << "Average Cycle Time: " << avgResTime << std::endl;
+    std::cout << "Average Rsys Time: " << avgRsysTime << std::endl;
     std::cout << "Throughput: " << (successfulReq + unsuccessfulReq) / t << std::endl;
     std::cout << "Goodput: " << (successfulReq) / t << std::endl;
     std::cout << "Badput: " << unsuccessfulReq / t << std::endl;

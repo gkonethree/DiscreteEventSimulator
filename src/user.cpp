@@ -6,7 +6,7 @@ std::mt19937 gen;
 
 
 ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event) {
-    int thinkTime = std::max(0, (int)this->thinkTime(gen));
+    Time thinkTime = std::max((Time)0, (Time)this->thinkTime(gen));
     Time responseTime=event->time + thinkTime - event->request->startTime;
     if( responseTime>= timeout){
         metrics->insertBadEvent(responseTime);
@@ -14,6 +14,8 @@ ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event) {
     else{
         metrics->insertGoodEvent(responseTime);
     }
+    Time rSysTime = event->time - event->request->startTime;
+    metrics->insertRsysEvent(rSysTime);
 
     ListOfEvents consequences;
     

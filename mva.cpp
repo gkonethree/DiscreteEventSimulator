@@ -31,6 +31,7 @@ int main(){
     vector<Time> Rs_sys, Rs_server;
     computeMVA(M, Ns, Ts, Rs_sys, Rs_server);
     for(int m = 1; m <= M; m++) {
+
         cout << "m=" << m <<"Rs_sys=" << Rs_sys[m]  << " T=" << Ts[m]<< " Ns=" << Ns[m]<< endl;
     }
 }
