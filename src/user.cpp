@@ -1,11 +1,14 @@
 #include "user.h"
 #include "request.h"
+#include <iostream>
+using namespace std;
 
 extern
 std::mt19937 gen;
 
 
 ListOfEvents User::receive(std::shared_ptr<RequestUnloadEvent> event) {
+    
     Time serviceTime = generateServiceTime();
     Time thinkTime = generateThinkTime();
 
@@ -40,7 +43,7 @@ Time User::generateServiceTime(){
         serviceTime = std::max((Time) 0, (Time) expServiceTime(gen));
     }
     else{
-        serviceTime = std::max((Time) 0, uniformServiceTime(gen));
+        serviceTime = std::max((Time) 0, (Time) uniformServiceTime(gen));
     }
     return serviceTime;
 }
@@ -60,7 +63,7 @@ ListOfEvents User::init(Time time) {
         serviceTime, *this, time
     );
     std::shared_ptr<Event> new_event = std::make_shared<RequestLoadEvent>(
-        time +thinkTime, *(this->serverLink), request
+        time, *(this->serverLink), request
     );
     consequences.push_back(new_event);
     return std::move(consequences);
