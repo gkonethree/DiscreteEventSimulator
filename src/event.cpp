@@ -1,5 +1,6 @@
 #include "event.h"
 #include "server.h"
+#include "core.h"
 
 ListOfEvents RequestCompletionEvent::execute(){
     return this->completeAt.receive(std::shared_ptr<RequestCompletionEvent>(shared_from_this()));
@@ -11,4 +12,8 @@ ListOfEvents RequestUnloadEvent::execute(){
 
 ListOfEvents RequestLoadEvent::execute(){
     return this->toLoadOn.receive(std::shared_ptr<RequestLoadEvent>(shared_from_this()));
+}
+
+ListOfEvents TimerInterruptEvent::execute(){
+    return this->core.receive(std::shared_ptr<TimerInterruptEvent>(shared_from_this()));
 }
